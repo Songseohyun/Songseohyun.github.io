@@ -1,0 +1,17 @@
+
+@font-face{font-family:"SDMiSaeng"; src:url('/font/SDMiSaeng.ttf')}
+
+.navbar-nav.ml-auto{
+	float:right;
+}
+
+.nav-item{
+    margin-right:10px;  
+}
+#mainNav{
+	position:sticky;
+}
+body {
+    overflow: hidden;
+    margin: 0;
+}

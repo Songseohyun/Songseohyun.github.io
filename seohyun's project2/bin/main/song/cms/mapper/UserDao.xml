@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- UserDao 클래스가 사용할 SQL이 들어 있는 파일 -->
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="song.cms.dao.UserDao">
+
+   
+    <resultMap type="User" id="UserMap">
+        <id column="userno"        property="userNo"/>
+        <result column="name"   property="name"/>
+        <result column="email"   property="email"/>
+        <result column="pwd"   property="pwd"/>
+        <result column="nick"   property="nick"/>
+        <result column="phone"   property="phone"/>
+        <result column="post_no"   property="post_no"/>
+        <result column="base_addr"   property="base_addr"/>
+        <result column="detail_addr"   property="detail_addr"/>
+        <result column="prof_img"   property="prof_img"/>
+        <result column="grade" property="grade"/>
+        <result column="rgdt"   property="rgdt"/>
+        <result column="stat"   property="stat"/>
+        <result column="email" property="email"/>
+        <result column="del_rgdt" property="del_rgdt"/>
+        <result column="count" property="count"/>
+        
+        
+    </resultMap>
+     
+    <insert id="signup" parameterType="User"
+            useGeneratedKeys="true" keyColumn="userno" keyProperty="userNo">
+        insert into user(id,pwd,name,post_no,base_addr,detail_addr,nick,phone,rgdt,grade,stat,email,prof_img)
+        values(#{id},#{pwd},#{name},#{post_no},#{base_addr},#{detail_addr},#{nick},#{phone},now(),'회원','X',#{email},'/upload/images/baseUserImg.png')
+    </insert> 
+    
+    <select id="overlapId"  parameterType="String" resultType="java.lang.Integer">
+        select count(*)
+        from user where id=#{id}
+    </select>
+    
+    <select id="overlapPhone"  parameterType="String" resultType="java.lang.Integer">
+        select count(*)
+        from user where id=#{phone}
+    </select>
+    
+    <select id="overlapEmail"  parameterType="String" resultType="java.lang.Integer">
+        select count(*)
+        from user where id=#{email}
+    </select>
+    
+    <select id="overlapNick"  parameterType="String" resultType="java.lang.Integer">
+        select count(*)
+        from user where id=#{nick}
+    </select>
+    
+    <select id="loginIdPwd" 
+            resultMap="UserMap" parameterType="map">
+        select 
+            userno,
+            name,
+            email,
+            pwd,
+            id,
+            nick,
+            phone,
+            post_no,
+            base_addr,
+            detail_addr,
+            prof_img,
+            rgdt,
+            stat,
+            grade
+        from 
+            user u
+        where
+            (u.id=#{id} and u.pwd=password(#{pwd}))
+            OR (u.id=#{id} and u.pwd=#{pwd})
+    </select> 
+    
+    <update id="updateProfileImg" parameterType="Map" >
+        update user
+            set prof_img = #{url}
+        where userno =#{no}
+    </update>
+    
+    <select id="searchUser" parameterType="int" resultMap="UserMap">
+	    select 
+	            name,
+	            email,
+	            id,
+	            nick,
+	            phone,
+	            post_no,
+	            base_addr,
+	            detail_addr,
+	            prof_img,
+	            rgdt,
+	            stat,
+	            grade
+	   from user
+	   where userno = #{no}
+    </select>
+    
+    <update id="nickUpdate" parameterType="Map" >
+        update user
+            set nick = #{nick}
+        where userno =#{no}
+    </update>
+    
+    <update id="emailUpdate" parameterType="Map" >
+        update user
+            set email = #{email}
+        where userno =#{no}
+    </update>
+    
+    <update id="phoneUpdate" parameterType="Map" >
+        update user
+            set phone = #{phone}
+        where userno =#{no}
+    </update>
+    
+    <update id="pwdUpdate" parameterType="Map" >
+        update user
+            set pwd = #{pwd}
+        where userno =#{no}
+    </update>
+    
+    <update id="addrUpdate" parameterType="Map" >
+        update user
+            set post_no = #{post_no},
+                base_addr = #{base_addr},
+                detail_addr = #{detail_addr}
+        where userno =#{no}
+    </update>
+    
+    <select id="userCheck" parameterType="Map" resultType="int">
+        select count(*)
+        from user
+        where userno = #{no} and pwd =#{pwd}
+    </select>
+    
+    <update id="userDelete" parameterType="int">
+        update user
+             set stat = 'D',
+                  del_rgdt = now()
+          where userno = #{no}        
+    </update>
+    
+    <update id="warningcountup" parameterType="int">
+        update user
+             set count = count+1
+         where userno = #{userno}
+    </update>
+    
+    <update id="warningcountdown" parameterType="int">
+	    update user
+	         set count = count-1
+	     where userno = #{userno}
+    </update>
+    
+    <update id="stopuser" parameterType="int">
+        update user 
+             set stat='O'
+         where userno = #{userno}   
+    </update>
+    
+    <update id="dontstopuser" parameterType="int">
+        update user 
+             set stat='X'
+         where userno = #{userno}  
+    </update>
+    
+    <select id="findByEmail" parameterType="Map" resultType="String">
+        select id
+         from user
+       where name = #{name} and email = #{email}
+    </select>
+    
+    <select id="findByPhone" parameterType="Map" resultType="String">
+	    select id
+	     from user
+	   where name = #{name} and phone = #{phone}
+    </select>
+    
+    <select id="checkSandEmail" parameterType="Map" resultType="int">
+        select count(*)
+        from user
+        where name = #{name} and email = #{email} and id = #{id}
+    </select>
+    
+    <select id="userNoCheck" parameterType="Map" resultType="int">
+        select userno
+         from user 
+       where  name = #{name} and email = #{email} and id = #{id}
+    </select>
+    
+    <delete id="delete">
+         DELETE
+			FROM USER
+		   WHERE date_add(user.del_rgdt,INTERVAL 30 DAY) = date_format(curdate(),'%Y-%m-%d')
+    </delete>
+  
+</mapper>
